@@ -40,6 +40,7 @@ def prepareWikiPage(i_row):
     pgContentType = i_row[4].strip()
     pgLanguage = i_row[6]
     pgPeriodicity = i_row[7].strip()
+    pgPermission = i_row[12]
     pgPages = i_row[13]
     pgAuthor = i_row[8]
     pgPublisher = i_row[9]
@@ -81,26 +82,30 @@ def prepareWikiPage(i_row):
 =={{Multi|வாசிக்க|To Read}}==
 """
 
-
     if pgContentType == "பத்திரிகை":
 
         tamilMonths = {"01":"தை", "02":"மாசி", "03":"பங்குனி", "04":"சித்திரை", "05":"வைகாசி", "06":"ஆனி", "07":"ஆடி", "08":"ஆவணி", "09":"புரட்டாதி", "10":"ஐப்பசி", "11":"கார்த்திகை", "12":"மார்கழி"}
-        pgMonth = translate(pgMonth, tamilMonths)
+        #pgMonth = translate(pgMonth, tamilMonths)
         pageParamsDict["month"] = pgMonth
 
         pageText = """{{பத்திரிகை|
-நூலக எண் = $number |
-வெளியீடு = $month $day, [[:பகுப்பு:$year|$year]]  |
-சுழற்சி = $periodicity |
-மொழி = $langauge |
-பக்கங்கள் = $pages |
-}}
+    நூலக எண் = $number |
+    வெளியீடு = [[:பகுப்பு:$year|$year]].$month.$day |
+    சுழற்சி = $periodicity |
+    இதழாசிரியர் = $author |
+    பதிப்பகம் = $publisher |
+    மொழி = $langauge |
+    பக்கங்கள் = $pages |
+    }}
 
 =={{Multi|வாசிக்க|To Read}}==
 """
 
     paramReplace = Template(pageText)
     pageText = paramReplace.substitute(pageParamsDict)
+
+    if pgPermission == "வெளியிடப்படாது":
+	pdfLink = "\n{{வெளியிடப்படாது}}"
 
     #Add pdf link
     pageText = pageText +  pdfLink;
@@ -121,10 +126,10 @@ def translate(string, wdict):
     return string.upper()
 
 # create a Wiki object
-site = wiki.Wiki("https://yourwiki.org/api.php")
+site = wiki.Wiki("http://www.yourwiki.org/wiki/api.php")
 
 # login - required for read-restricted wikis
-if not site.login("Username ", "Password", verify=True):
+if not site.login("Username", "password", verify=True):
     print("Login failed")
 
 #Get Token (needed to edit wiki)
@@ -135,10 +140,10 @@ batchfile = open('createdata.csv', 'rt')
 try:
      reader = csv.reader(batchfile)
      for row in reader:
-        pgTitle = row[2]
+	pgTitle = row[2]
         pageText = prepareWikiPage(row)
         print(pageText)
-        updateWikiPage(site, api, token, pgTitle, pageText)
+       	updateWikiPage(site, api, token, pgTitle, pageText)
 
 finally:
      batchfile.close()

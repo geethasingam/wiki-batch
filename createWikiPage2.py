@@ -121,7 +121,7 @@ def translate(string, wdict):
     return string.upper()
 
 # create a Wiki object
-site = wiki.Wiki("https://yourwiki.org/api.php")
+site = wiki.Wiki("http://yourwiki.org/api.php")
 
 # login - required for read-restricted wikis
 if not site.login("Username ", "Password", verify=True):
